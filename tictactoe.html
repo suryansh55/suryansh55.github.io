@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe AI | Project</title>
+    <style>
+        /* COPYING SHARED STYLES FROM INDEX */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 0; margin: 0; color: #333; background-color: #f4f4f9; }
+        nav { background: #333; color: white; padding: 15px 0; display: flex; justify-content: center; align-items: center; }
+        nav a { color: white; text-decoration: none; padding: 10px 20px; font-weight: bold; transition: 0.3s; }
+        nav a:hover { color: #89b4fa; }
+        .dropdown { position: relative; display: inline-block; }
+        .dropdown-content { display: none; position: absolute; background-color: white; min-width: 160px; box-shadow: 0px 8px 16px rgba(0,0,0,0.1); z-index: 10; border-radius: 4px; top: 100%; }
+        .dropdown-content a { color: #333 !important; padding: 12px 16px; text-decoration: none; display: block; text-align: left; }
+        .dropdown:hover .dropdown-content { display: block; }
+        footer { margin-top: 50px; padding: 40px 20px; font-size: 0.9em; color: #888; border-top: 1px solid #eee; background: #fff; }
+        footer a { color: #0077cc; text-decoration: none; font-weight: bold; }
+
+        /* GAME SPECIFIC STYLES */
+        #game-container { margin: 40px auto; max-width: 400px; padding: 30px; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        #board { display: grid; grid-template-columns: repeat(3, 100px); gap: 10px; justify-content: center; margin-top: 20px; }
+        .cell { width: 100px; height: 100px; background: #f0f0f0; font-size: 2.5em; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 12px; transition: 0.2s; }
+        .cell:hover { background: #e8e8e8; }
+        .cell.x { color: #d9534f; } 
+        .cell.o { color: #5cb85c; }
+        #status { margin-top: 20px; font-size: 1.1em; font-weight: bold; height: 24px; }
+        #resetBtn { margin-top: 25px; padding: 12px 25px; font-size: 1em; background: #0077cc; color: white; border: none; border-radius: 8px; cursor: pointer; display: none; font-weight: bold; }
+        #resetBtn:hover { background: #005fa3; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html">Home</a>
+        <div class="dropdown">
+            <a href="#">Projects ▾</a>
+            <div class="dropdown-content">
+                <a href="tictactoe.html">Tic-Tac-Toe AI</a>
+            </div>
+        </div>
+        <a href="mailto:sankur@ualberta.ca">Contact</a>
+    </nav>
+
+    <h1>Q-Learning Tic-Tac-Toe (Q-Learning Algorithm)</h1>
+    <p>Can you beat an agent trained on 100,000 games? (Hint: You can't.)</p>
+
+    <div id="game-container">
+        <div id="status">Loading AI Brain...</div>
+        <div id="board"></div>
+        <button id="resetBtn" onclick="resetGame()">Play Again</button>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Suryansh Ankur | <a href="https://www.linkedin.com/in/suryansh-ankur" target="_blank">LinkedIn Profile</a></p>
+    </footer>
+
+    <script>
+        let qTable = {};
+        // Match your python board starting state exactly
+        let board = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+        let gameActive = false;
+
+        // The 8 possible winning lines mapped to the 0-8 array indices
+        const winPatterns = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Cols
+            [0, 4, 8], [2, 4, 6]             // Diagonals
+        ];
+
+        // 1. Load the exported JSON brain
+        fetch('agent_brain.json')
+            .then(response => response.json())
+            .then(data => {
+                qTable = data;
+                document.getElementById('status').innerText = "AI is ready. You are X. Your turn!";
+                gameActive = true;
+                drawBoard();
+                //setTimeout(aiMove, 600);
+            })
+            .catch(error => {
+                document.getElementById('status').innerText = "Error loading AI brain! Are you using a local server?";
+            });
+
+        // 2. Draw the grid
+        function drawBoard() {
+            const boardDiv = document.getElementById('board');
+            boardDiv.innerHTML = '';
+            board.forEach((cell, index) => {
+                const div = document.createElement('div');
+                div.className = 'cell';
+                
+                if (cell === 99) {
+                    div.innerText = 'X';
+                    div.classList.add('x');
+                } else if (cell === 88) {
+                    div.innerText = 'O';
+                    div.classList.add('o');
+                } else {
+                    div.innerText = '';
+                }
+                
+                div.onclick = () => humanMove(index);
+                boardDiv.appendChild(div);
+            });
+        }
+
+        // --- GAME LOGIC (Translated from your Python class) ---
+        function checkWin(player) {
+            return winPatterns.some(pattern => {
+                return pattern.every(index => board[index] === player);
+            });
+        }
+
+        function checkDraw() {
+            // If every space is either 99 or 88, the board is full
+            return board.every(cell => cell === 99 || cell === 88);
+        }
+
+        function endGame(message) {
+            gameActive = false;
+            document.getElementById('status').innerText = message;
+            document.getElementById('resetBtn').style.display = 'inline-block';
+        }
+
+        function resetGame() {
+            board = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+            gameActive = true;
+            document.getElementById('status').innerText = "You are X. Your turn";
+            document.getElementById('resetBtn').style.display = 'none';
+            //setTimeout(aiMove, 600);
+            drawBoard();
+        }
+
+        // 3. Handle your click (88)
+        function humanMove(index) {
+            if (!gameActive || board[index] === 99 || board[index] === 88) return;
+            
+           // board[index] = 88; // Human plays
+            board[index] = 99; // if Human plays first
+            drawBoard();
+            
+            if (checkWin(99)) {
+                endGame("🎉 YOU WIN! (Wait, how did you beat my perfect AI?)");
+                return;
+            }
+            if (checkDraw()) {
+                endGame("🤝 It's a Draw!");
+                return;
+            }
+            
+            document.getElementById('status').innerText = "AI is thinking...";
+            gameActive = false; // Lock board while AI thinks
+            setTimeout(aiMove, 400); // 400ms delay feels natural
+        }
+
+        // 4. Handle the AI's move (99)
+        function aiMove() {
+            let stateKey = "(" + board.join(", ") + ")";
+            let qValues = qTable[stateKey];
+
+            let bestMoveIndex = -1;
+            let maxQ = -Infinity;
+
+            // Search the Q-table just like in python
+            for (let i = 0; i < 9; i++) {
+                if (board[i] !== 88 && board[i] !== 99) { 
+                    let score = qValues ? qValues[i] : 0; 
+                    if (score > maxQ) {
+                        maxQ = score;
+                        bestMoveIndex = i;
+                    }
+                }
+            }
+
+            if (bestMoveIndex !== -1) {
+               // board[bestMoveIndex] = 99; 
+               board[bestMoveIndex] = 88; //if ai plays 2nd
+            }
+            
+            drawBoard();
+
+            if (checkWin(88)) {
+                endGame("🤖 AI WINS! Good Game try again ?");
+                return;
+            }
+            if (checkDraw()) {
+                endGame("🤝 It's a Draw!");
+                return;
+            }
+
+            document.getElementById('status').innerText = "Your turn!";
+            gameActive = true; // Unlock board
+        }
+    </script>
+</body>
+</html>

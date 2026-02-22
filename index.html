@@ -1,26 +1,63 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Portfolio</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suryansh Ankur | Portfolio</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 50px; }
-        h1 { color: #333; }
-        p { color: #666; }
-        a { color: #0077cc; text-decoration: none; }
+        /* Shared Global Styles */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 0; margin: 0; color: #333; background-color: #fcfcfc; line-height: 1.6; }
+        
+        /* Consistent Navigation */
+        nav { background: #333; color: white; padding: 15px 0; display: flex; justify-content: center; align-items: center; position: sticky; top: 0; z-index: 1000; }
+        nav a { color: white; text-decoration: none; padding: 10px 20px; font-weight: bold; transition: 0.3s; }
+        nav a:hover { color: #89b4fa; }
+
+        /* Dropdown Logic */
+        .dropdown { position: relative; display: inline-block; }
+        .dropdown-content {
+            display: none; position: absolute; background-color: white; min-width: 160px;
+            box-shadow: 0px 8px 16px rgba(0,0,0,0.1); z-index: 10; border-radius: 4px; top: 100%;
+        }
+        .dropdown-content a { color: #333 !important; padding: 12px 16px; text-decoration: none; display: block; text-align: left; }
+        .dropdown-content a:hover { background-color: #f1f1f1; }
+        .dropdown:hover .dropdown-content { display: block; }
+
+        /* Hero Content */
+        header { padding: 100px 20px; max-width: 800px; margin: 0 auto; }
+        h1 { font-size: 3.5em; margin-bottom: 10px; color: #222; }
+        .accent-bar { width: 60px; height: 4px; background: #0077cc; margin: 20px auto; border-radius: 2px; }
+        .bio { font-size: 1.2em; color: #555; }
+
+        /* Consistent Footer */
+        footer { margin-top: 50px; padding: 40px 20px; font-size: 0.9em; color: #888; border-top: 1px solid #eee; background: #fff; }
+        footer a { color: #0077cc; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <h1>Suryansh Ankur</h1>
-    <p>Welcome to my portfolio.</p>
-    
-    <p>I am a Computing Science student.</p>
-    
-    <hr>
-    
-    <h3>Contact Me</h3>
-    <p>Email: <a href="mailto:sankur@ualberta.ca"> Email me</a></p>
-    <p>LinkedIn: <a href="www.linkedin.com/in/suryansh-ankur">My LinkedIn Profile</a></p>
+    <nav>
+        <a href="index.html">Home</a>
+        <div class="dropdown">
+            <a href="#">Projects ▾</a>
+            <div class="dropdown-content">
+                <a href="tictactoe.html">Tic-Tac-Toe AI</a>
+            </div>
+        </div>
+        <a href="mailto:sankur@ualberta.ca">Contact</a>
+    </nav>
+
+    <header>
+        <h1>Suryansh Ankur</h1>
+        <div class="accent-bar"></div>
+        <p class="bio">Computing Science Student @ University of Alberta</p>
+        <p>Welcome to my portfolio. I specialize in software development and reinforcement learning.</p>
+        <p>Explore my <strong>Tic-Tac-Toe AI</strong> in the projects menu to see an agent trained via Q-Learning!</p>
+    </header>
+
+    <footer>
+        <p>&copy; 2026 Suryansh Ankur | <a href="https://www.linkedin.com/in/suryansh-ankur" target="_blank">LinkedIn Profile</a></p>
+    </footer>
 
 </body>
 </html>
