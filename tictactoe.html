@@ -25,8 +25,17 @@
         .cell.x { color: #d9534f; } 
         .cell.o { color: #5cb85c; }
         #status { margin-top: 20px; font-size: 1.1em; font-weight: bold; height: 24px; }
-        #resetBtn { margin-top: 25px; padding: 12px 25px; font-size: 1em; background: #0077cc; color: white; border: none; border-radius: 8px; cursor: pointer; display: none; font-weight: bold; }
+        #resetBtn { margin-top: 25px; padding: 12px 25px; font-size: 1em; background: #0077cc; color: white; border: none; border-radius: 8px; cursor: pointer; display: none; font-weight: bold; margin-bottom: 20px; }
         #resetBtn:hover { background: #005fa3; }
+
+        /* --- NEW: SCOREBOARD STYLES --- */
+        #scoreboard { display: flex; justify-content: space-around; margin-top: 25px; padding-top: 20px; border-top: 2px solid #eee; font-size: 1.1em; font-weight: bold; }
+        .score-box { display: flex; flex-direction: column; align-items: center; }
+        .score-label { font-size: 0.8em; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .score-value { font-size: 1.5em; }
+        #score-wins { color: #d9534f; } /* Red for Player X */
+        #score-losses { color: #5cb85c; } /* Green for AI O */
+        #score-draws { color: #333; }
     </style>
 </head>
 <body>
@@ -49,6 +58,21 @@
         <div id="status">Loading AI Brain...</div>
         <div id="board"></div>
         <button id="resetBtn" onclick="resetGame()">Play Again</button>
+
+        <div id="scoreboard">
+            <div class="score-box">
+                <span class="score-label">You</span>
+                <span class="score-value" id="score-wins">0</span>
+            </div>
+            <div class="score-box">
+                <span class="score-label">Draws</span>
+                <span class="score-value" id="score-draws">0</span>
+            </div>
+            <div class="score-box">
+                <span class="score-label">AI</span>
+                <span class="score-value" id="score-losses">0</span>
+            </div>
+        </div>
     </div>
 
     <footer>
@@ -57,18 +81,20 @@
 
     <script>
         let qTable = {};
-        // Match your python board starting state exactly
         let board = [1, 2, 3, 4, 5, 6, 7, 8, 9];
         let gameActive = false;
 
-        // The 8 possible winning lines mapped to the 0-8 array indices
+        // --- NEW: SCORE TRACKING VARIABLES ---
+        let playerWins = 0;
+        let aiWins = 0;
+        let draws = 0;
+
         const winPatterns = [
-            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
-            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Cols
-            [0, 4, 8], [2, 4, 6]             // Diagonals
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], 
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], 
+            [0, 4, 8], [2, 4, 6]             
         ];
 
-        // 1. Load the exported JSON brain
         fetch('agent_brain.json')
             .then(response => response.json())
             .then(data => {
@@ -76,13 +102,11 @@
                 document.getElementById('status').innerText = "AI is ready. You are X. Your turn!";
                 gameActive = true;
                 drawBoard();
-                //setTimeout(aiMove, 600);
             })
             .catch(error => {
                 document.getElementById('status').innerText = "Error loading AI brain! Are you using a local server?";
             });
 
-        // 2. Draw the grid
         function drawBoard() {
             const boardDiv = document.getElementById('board');
             boardDiv.innerHTML = '';
@@ -105,7 +129,6 @@
             });
         }
 
-        // --- GAME LOGIC (Translated from your Python class) ---
         function checkWin(player) {
             return winPatterns.some(pattern => {
                 return pattern.every(index => board[index] === player);
@@ -113,14 +136,26 @@
         }
 
         function checkDraw() {
-            // If every space is either 99 or 88, the board is full
             return board.every(cell => cell === 99 || cell === 88);
         }
 
-        function endGame(message) {
+        // --- UPDATED: ENDGAME NOW ACCEPTS A RESULT TO UPDATE SCORE ---
+        function endGame(message, result) {
             gameActive = false;
             document.getElementById('status').innerText = message;
             document.getElementById('resetBtn').style.display = 'inline-block';
+
+            // Update variables based on who won
+            if (result === 'win') {
+                playerWins++;
+                document.getElementById('score-wins').innerText = playerWins;
+            } else if (result === 'loss') {
+                aiWins++;
+                document.getElementById('score-losses').innerText = aiWins;
+            } else if (result === 'draw') {
+                draws++;
+                document.getElementById('score-draws').innerText = draws;
+            }
         }
 
         function resetGame() {
@@ -128,33 +163,30 @@
             gameActive = true;
             document.getElementById('status').innerText = "You are X. Your turn";
             document.getElementById('resetBtn').style.display = 'none';
-            //setTimeout(aiMove, 600);
             drawBoard();
         }
 
-        // 3. Handle your click (88)
         function humanMove(index) {
             if (!gameActive || board[index] === 99 || board[index] === 88) return;
             
-           // board[index] = 88; // Human plays
-            board[index] = 99; // if Human plays first
+            board[index] = 99; 
             drawBoard();
             
+            // --- UPDATED: PASS THE RESULT STRING TO ENDGAME ---
             if (checkWin(99)) {
-                endGame("🎉 YOU WIN! (Wait, how did you beat my perfect AI?)");
+                endGame("🎉 YOU WIN! (Wait, how did you beat my perfect AI?)", 'win');
                 return;
             }
             if (checkDraw()) {
-                endGame("🤝 It's a Draw!");
+                endGame("🤝 It's a Draw!", 'draw');
                 return;
             }
             
             document.getElementById('status').innerText = "AI is thinking...";
-            gameActive = false; // Lock board while AI thinks
-            setTimeout(aiMove, 400); // 400ms delay feels natural
+            gameActive = false; 
+            setTimeout(aiMove, 400); 
         }
 
-        // 4. Handle the AI's move (99)
         function aiMove() {
             let stateKey = "(" + board.join(", ") + ")";
             let qValues = qTable[stateKey];
@@ -162,7 +194,6 @@
             let bestMoveIndex = -1;
             let maxQ = -Infinity;
 
-            // Search the Q-table just like in python
             for (let i = 0; i < 9; i++) {
                 if (board[i] !== 88 && board[i] !== 99) { 
                     let score = qValues ? qValues[i] : 0; 
@@ -174,23 +205,23 @@
             }
 
             if (bestMoveIndex !== -1) {
-               // board[bestMoveIndex] = 99; 
-               board[bestMoveIndex] = 88; //if ai plays 2nd
+               board[bestMoveIndex] = 88; 
             }
             
             drawBoard();
 
+            // --- UPDATED: PASS THE RESULT STRING TO ENDGAME ---
             if (checkWin(88)) {
-                endGame("🤖 AI WINS! Good Game try again ?");
+                endGame("🤖 AI WINS! Good Game try again ?", 'loss');
                 return;
             }
             if (checkDraw()) {
-                endGame("🤝 It's a Draw!");
+                endGame("🤝 It's a Draw!", 'draw');
                 return;
             }
 
             document.getElementById('status').innerText = "Your turn!";
-            gameActive = true; // Unlock board
+            gameActive = true; 
         }
     </script>
 </body>
