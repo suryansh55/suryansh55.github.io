@@ -3,11 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tic-Tac-Toe AI | Project</title>
+    <title>Tic-Tac-Toe AI | Comparative Study</title>
     <style>
-        /* COPYING SHARED STYLES FROM INDEX */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 0; margin: 0; color: #333; background-color: #f4f4f9; }
-        nav { background: #333; color: white; padding: 15px 0; display: flex; justify-content: center; align-items: center; }
+        /* --- NEW: CSS VARIABLES FOR THEMES --- */
+        :root {
+            --bg-color: #f4f4f9;
+            --nav-bg: #333;
+            --primary-accent: #0077cc;
+            --primary-hover: #005fa3;
+        }
+
+        /* THEME CLASSES */
+        body.theme-q { --bg-color: #f4f4f9; --nav-bg: #333; --primary-accent: #0077cc; --primary-hover: #005fa3; }
+        body.theme-sarsa { --bg-color: #f3e5f5; --nav-bg: #2c3e50; --primary-accent: #8e44ad; --primary-hover: #732d91; }
+        body.theme-esarsa { --bg-color: #e0f2f1; --nav-bg: #1e3a34; --primary-accent: #16a085; --primary-hover: #0f7c66; }
+        body.theme-dq { --bg-color: #f9ebea; --nav-bg: #2b1110; --primary-accent: #c0392b; --primary-hover: #922b21; }
+
+        /* SHARED STYLES */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 0; margin: 0; color: #333; background-color: var(--bg-color); transition: background-color 0.5s ease; }
+        nav { background: var(--nav-bg); color: white; padding: 15px 0; display: flex; justify-content: center; align-items: center; transition: background-color 0.5s ease; }
         nav a { color: white; text-decoration: none; padding: 10px 20px; font-weight: bold; transition: 0.3s; }
         nav a:hover { color: #89b4fa; }
         .dropdown { position: relative; display: inline-block; }
@@ -15,30 +29,34 @@
         .dropdown-content a { color: #333 !important; padding: 12px 16px; text-decoration: none; display: block; text-align: left; }
         .dropdown:hover .dropdown-content { display: block; }
         footer { margin-top: 50px; padding: 40px 20px; font-size: 0.9em; color: #888; border-top: 1px solid #eee; background: #fff; }
-        footer a { color: #0077cc; text-decoration: none; font-weight: bold; }
+        footer a { color: var(--primary-accent); text-decoration: none; font-weight: bold; transition: color 0.5s ease; }
+
+        /* CONTROLS (THE SWITCHER) */
+        #controls { margin: 20px auto; padding: 15px; background: white; display: inline-block; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        select { padding: 8px 15px; font-size: 1em; font-weight: bold; border-radius: 5px; border: 2px solid var(--primary-accent); cursor: pointer; outline: none; }
 
         /* GAME SPECIFIC STYLES */
-        #game-container { margin: 40px auto; max-width: 400px; padding: 30px; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        #game-container { margin: 20px auto; max-width: 400px; padding: 30px; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
         #board { display: grid; grid-template-columns: repeat(3, 100px); gap: 10px; justify-content: center; margin-top: 20px; }
         .cell { width: 100px; height: 100px; background: #f0f0f0; font-size: 2.5em; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 12px; transition: 0.2s; }
         .cell:hover { background: #e8e8e8; }
         .cell.x { color: #d9534f; } 
         .cell.o { color: #5cb85c; }
-        #status { margin-top: 20px; font-size: 1.1em; font-weight: bold; height: 24px; }
-        #resetBtn { margin-top: 25px; padding: 12px 25px; font-size: 1em; background: #0077cc; color: white; border: none; border-radius: 8px; cursor: pointer; display: none; font-weight: bold; margin-bottom: 20px; }
-        #resetBtn:hover { background: #005fa3; }
+        #status { margin-top: 20px; font-size: 1.1em; font-weight: bold; height: 24px; color: var(--primary-accent); transition: color 0.5s ease; }
+        #resetBtn { margin-top: 25px; padding: 12px 25px; font-size: 1em; background: var(--primary-accent); color: white; border: none; border-radius: 8px; cursor: pointer; display: none; font-weight: bold; margin-bottom: 20px; transition: background-color 0.5s ease; }
+        #resetBtn:hover { background: var(--primary-hover); }
 
-        /* --- NEW: SCOREBOARD STYLES --- */
+        /* SCOREBOARD STYLES */
         #scoreboard { display: flex; justify-content: space-around; margin-top: 25px; padding-top: 20px; border-top: 2px solid #eee; font-size: 1.1em; font-weight: bold; }
         .score-box { display: flex; flex-direction: column; align-items: center; }
         .score-label { font-size: 0.8em; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
         .score-value { font-size: 1.5em; }
-        #score-wins { color: #d9534f; } /* Red for Player X */
-        #score-losses { color: #5cb85c; } /* Green for AI O */
+        #score-wins { color: #d9534f; } 
+        #score-losses { color: #5cb85c; } 
         #score-draws { color: #333; }
     </style>
 </head>
-<body>
+<body class="theme-q">
 
     <nav>
         <a href="index.html">Home</a>
@@ -51,8 +69,18 @@
         <a href="mailto:sankur@ualberta.ca">Contact</a>
     </nav>
 
-    <h1>Tic-Tac-Toe (Q-Learning Algorithm)</h1>
+    <h1 id="algo-title">Tic-Tac-Toe (Q-Learning Algorithm)</h1>
     <p>Can you beat an agent trained on 100,000 games?</p>
+
+    <div id="controls">
+        <label for="brain-select">Choose AI Brain: </label>
+        <select id="brain-select" onchange="switchBrain()">
+            <option value="agent_brain_q.json" data-theme="theme-q" data-title="Q-Learning">Q-Learning</option>
+            <option value="agent_brain_sarsa.json" data-theme="theme-sarsa" data-title="SARSA">SARSA</option>
+            <option value="agent_brain_expected_sarsa.json" data-theme="theme-esarsa" data-title="Expected SARSA">Expected SARSA</option>
+            <option value="agent_brain_double_q.json" data-theme="theme-dq" data-title="Double Q-Learning">Double Q-Learning</option>
+        </select>
+    </div>
 
     <div id="game-container">
         <div id="status">Loading AI Brain...</div>
@@ -84,7 +112,6 @@
         let board = [1, 2, 3, 4, 5, 6, 7, 8, 9];
         let gameActive = false;
 
-        // --- NEW: SCORE TRACKING VARIABLES ---
         let playerWins = 0;
         let aiWins = 0;
         let draws = 0;
@@ -95,17 +122,43 @@
             [0, 4, 8], [2, 4, 6]             
         ];
 
-        fetch('agent_brain.json')
-            .then(response => response.json())
-            .then(data => {
-                qTable = data;
-                document.getElementById('status').innerText = "AI is ready. You are X. Your turn!";
-                gameActive = true;
-                drawBoard();
-            })
-            .catch(error => {
-                document.getElementById('status').innerText = "Error loading AI brain! Are you using a local server?";
-            });
+        // --- NEW: FUNCTION TO SWITCH BRAINS AND THEMES ---
+        function switchBrain() {
+            const select = document.getElementById("brain-select");
+            const selectedOption = select.options[select.selectedIndex];
+            const file = selectedOption.value;
+            const theme = selectedOption.getAttribute("data-theme");
+            const title = selectedOption.getAttribute("data-title");
+
+            // Update UI Title and Colors
+            document.getElementById("algo-title").innerText = `Tic-Tac-Toe (${title} Algorithm)`;
+            document.body.className = theme;
+
+            // Reset scores for the new algorithm comparison
+            //playerWins = 0; aiWins = 0; draws = 0;
+            document.getElementById('score-wins').innerText = 0;
+            document.getElementById('score-losses').innerText = 0;
+            document.getElementById('score-draws').innerText = 0;
+
+            // Pause game and fetch new brain
+            gameActive = false;
+            document.getElementById('status').innerText = `Loading ${title} Brain...`;
+
+            fetch(file)
+                .then(response => response.json())
+                .then(data => {
+                    qTable = data;
+                    resetGame(); // Clears the board
+                    document.getElementById('status').innerText = `${title} is ready. You are X. Your turn!`;
+                })
+                .catch(error => {
+                    document.getElementById('status').innerText = `Error loading ${file}! Check console.`;
+                    console.error("Failed to load brain:", error);
+                });
+        }
+
+        // Initialize the first brain on page load
+        window.onload = switchBrain;
 
         function drawBoard() {
             const boardDiv = document.getElementById('board');
@@ -139,13 +192,11 @@
             return board.every(cell => cell === 99 || cell === 88);
         }
 
-        // --- UPDATED: ENDGAME NOW ACCEPTS A RESULT TO UPDATE SCORE ---
         function endGame(message, result) {
             gameActive = false;
             document.getElementById('status').innerText = message;
             document.getElementById('resetBtn').style.display = 'inline-block';
 
-            // Update variables based on who won
             if (result === 'win') {
                 playerWins++;
                 document.getElementById('score-wins').innerText = playerWins;
@@ -161,7 +212,7 @@
         function resetGame() {
             board = [1, 2, 3, 4, 5, 6, 7, 8, 9];
             gameActive = true;
-            document.getElementById('status').innerText = "You are X. Your turn";
+            document.getElementById('status').innerText = "You are X. Your turn!";
             document.getElementById('resetBtn').style.display = 'none';
             drawBoard();
         }
@@ -172,7 +223,6 @@
             board[index] = 99; 
             drawBoard();
             
-            // --- UPDATED: PASS THE RESULT STRING TO ENDGAME ---
             if (checkWin(99)) {
                 endGame("🎉 YOU WIN! (Wait, how did you beat my perfect AI?)", 'win');
                 return;
@@ -210,9 +260,8 @@
             
             drawBoard();
 
-            // --- UPDATED: PASS THE RESULT STRING TO ENDGAME ---
             if (checkWin(88)) {
-                endGame("🤖 AI WINS! Good Game try again ?", 'loss');
+                endGame("🤖 AI WINS! Good Game, try again?", 'loss');
                 return;
             }
             if (checkDraw()) {
